@@ -1,15 +1,15 @@
-function deleteUploadedFile(el) {
+function deleteUploadedFile(el, parent_id) {
     const uploadedFile = el.parentNode;
     const uploadedFilesSection = uploadedFile.parentNode;
     uploadedFile.remove();
     handle_files({
-        parentElement: ".container-handle-files",
-        enableCamera: true, //done
-        enableFileInput: true, //done
-        fileType: ".jpeg, .jpg, .png, .docx, .pdf, .xlsx", //done
-        previewImage: true, //done
-        fileLimitQty: 7, //done
-        uploadedFileQty: uploadedFilesSection.querySelectorAll('.uploaded-file').length, //done
+        parentElement: parent_id,
+        enableCamera: true,
+        enableFileInput: true,
+        fileType: ".jpeg, .jpg, .png, .docx, .pdf, .xlsx",
+        previewImage: true,
+        fileLimitQty: 7,
+        uploadedFileQty: uploadedFilesSection.querySelectorAll('.uploaded-file').length,
     })
 }
 
@@ -42,6 +42,12 @@ var stop = () => video.srcObject && video.srcObject.getTracks().forEach(t => t.s
 change_camera_postion();
 
 function handle_files(object) {
+    if (!SAVED_FILES.some(file => file.id === object.parentElement)) {
+        SAVED_FILES.push({ id: object.parentElement, files: [] });
+    }
+
+    let obj_saved = SAVED_FILES.find(file => file.id === object.parentElement);
+
     let limitFile;
     if (object.fileLimitQty !== -1) {
         limitFile = object.fileLimitQty - object.uploadedFileQty;
@@ -81,17 +87,17 @@ function handle_files(object) {
                         You can only upload up to ${object.fileLimitQty} files
                     </div>
                 `
-                if(object.enableFileInput) btnInput.disabled = true;
-                if(object.enableCamera) btnTakePhoto.disabled = true;
+                if (object.enableFileInput) btnInput.disabled = true;
+                if (object.enableCamera) btnTakePhoto.disabled = true;
             } else {
                 alertLimit.innerHTML = '';
-                if(object.enableFileInput) btnInput.disabled = false;
-                if(object.enableCamera) btnTakePhoto.disabled = false;
+                if (object.enableFileInput) btnInput.disabled = false;
+                if (object.enableCamera) btnTakePhoto.disabled = false;
             }
         }
     }
 
-    
+
 
     // OBJECT: handle input file by element
     if (object.enableFileInput) {
@@ -107,7 +113,7 @@ function handle_files(object) {
         }
 
         const fileInputElement = fileInputSection.querySelector('input.file-input');
-        if(fileInputSection.classList.contains('disabled')) fileInputElement.disabled = true;
+        if (fileInputSection.classList.contains('disabled')) fileInputElement.disabled = true;
         else fileInputElement.disabled = false;
 
         if (!object.enableCamera && object.fileLimitQty !== -1) {
@@ -118,7 +124,6 @@ function handle_files(object) {
                 fileInputSection.append(div);
             }
             const infoSection = fileInputSection.querySelector('.info-qty');
-            console.log('1. info-qty');
             infoSection.innerHTML = `
                 <span class="remaining-file">0</span>/<span class="limit-file"></span>
             `
@@ -134,24 +139,24 @@ function handle_files(object) {
                         alert(`The file size of ${fileInputElement.files[i].name} exceeds ${fileInputElement.dataset.limitSize}MB. Please make sure your file does not exceed ${fileInputElement.dataset.limitSize}MB`)
                     } else { // jika size dari file kurang dari size limit maka akan di push ke SAVED_FILES
                         if (object.fileLimitQty !== -1) {
-                            if (SAVED_FILES.length < limitFile){
-                                SAVED_FILES.push(fileInputElement.files[i]);
-                                handle_qty_file(SAVED_FILES.length);
+                            if (obj_saved.files.length < limitFile) {
+                                obj_saved.files.push(fileInputElement.files[i]);
+                                handle_qty_file(obj_saved.files.length);
                             } else console.log(`you can only upload up to ${object.fileLimitQty}`)
-                        } else SAVED_FILES.push(fileInputElement.files[i]);
+                        } else obj_saved.files.push(fileInputElement.files[i]);
                     }
                 }
             } else {
                 const files = Array.from(fileInputElement.files);
                 if (object.fileLimitQty !== -1) {
-                    if((files.length + SAVED_FILES.length) < limitFile){
-                        SAVED_FILES = SAVED_FILES.concat(files);
+                    if ((files.length + obj_saved.files.length) < limitFile) {
+                        obj_saved.files = obj_saved.files.concat(files);
                     } else {
-                        SAVED_FILES = SAVED_FILES.concat(files.splice(0, limitFile)); // hanya mengambil 10 file
+                        obj_saved.files = obj_saved.files.concat(files.splice(0, limitFile)); // hanya mengambil 10 file
                         console.log(`you can only upload up to ${object.fileLimitQty}`)
                     }
-                } else SAVED_FILES = SAVED_FILES.concat(files);
-                handle_qty_file(SAVED_FILES.length);
+                } else obj_saved.files = obj_saved.files.concat(files);
+                handle_qty_file(obj_saved.files.length);
             }
             fileInputElement.value = null;
             update_file_list();
@@ -178,10 +183,10 @@ function handle_files(object) {
             </button>
             <canvas id="canvas" width="500" height="500" hidden></canvas>
         `;
-        
+
         const btnTakePhoto = cameraSection.querySelector(".btn-take-photo");
         if (object.fileLimitQty !== -1) {
-            btnTakePhoto.innerHTML = `Take Photo <span class="remaining-file">0</span>/<span class="limit-file"></span>`;   
+            btnTakePhoto.innerHTML = `Take Photo <span class="remaining-file">0</span>/<span class="limit-file"></span>`;
         }
 
         if (cameraSection.classList.contains('disabled')) btnTakePhoto.disabled = true;
@@ -202,8 +207,8 @@ function handle_files(object) {
                     // Convert Blob to File
                     const file = new File([blob], `photo_${Date.now()}.jpeg`, { type: 'image/jpeg' });
                     // Store the file in the array
-                    SAVED_FILES.push(file);
-                    if (object.fileLimitQty !== -1) handle_qty_file(SAVED_FILES.length);
+                    obj_saved.files.push(file);
+                    if (object.fileLimitQty !== -1) handle_qty_file(obj_saved.files.length);
                     update_file_list();
                 })
                 .catch(error => console.error('Error converting data URL to Blob:', error));
@@ -215,12 +220,12 @@ function handle_files(object) {
         const fileList = fileListSection.querySelector('.fileList');
         fileList.innerHTML = "";
 
-        if (object.fileLimitQty !== -1 && SAVED_FILES.length > limitFile) {
-            SAVED_FILES = SAVED_FILES.splice(0, limitFile);
-            handle_qty_file(SAVED_FILES.length);
+        if (object.fileLimitQty !== -1 && obj_saved.files.length > limitFile) {
+            obj_saved.files = obj_saved.files.splice(0, limitFile);
+            handle_qty_file(obj_saved.files.length);
         }
 
-        SAVED_FILES.forEach((file, index) => {
+        obj_saved.files.forEach((file, index) => {
             let typeFile = file.name.split('.').pop();
             const div = document.createElement('div');
 
@@ -273,16 +278,16 @@ function handle_files(object) {
 
         //store to saved from sample
         const dataTransfer = new DataTransfer();
-        SAVED_FILES.forEach((file) => {
+        obj_saved.files.forEach((file) => {
             dataTransfer.items.add(file);
         });
-        // menyimpan files yang berada di SAVED_FILES ke Element Input File (Saved)
+        // menyimpan files yang berada di obj_saved.files ke Element Input File (Saved)
         savedFilesInputElement.files = dataTransfer.files;
     }
 
     function cancel_file(index) {
-        SAVED_FILES.splice(index, 1);
-        if (object.fileLimitQty !== -1) handle_qty_file(SAVED_FILES.length);
+        obj_saved.files.splice(index, 1);
+        if (object.fileLimitQty !== -1) handle_qty_file(obj_saved.files.length);
         alertLimit.innerHTML = '';
         update_file_list();
     }
@@ -291,7 +296,6 @@ function handle_files(object) {
     let limitFileElement;
     if (object.fileLimitQty !== -1) {
         remainingFileElement = document.querySelector('.remaining-file');
-        console.log('2. injects');
         remainingFileElement.innerHTML = object.uploadedFileQty;
         limitFileElement = document.querySelector('.limit-file');
         limitFileElement.innerHTML = object.fileLimitQty;

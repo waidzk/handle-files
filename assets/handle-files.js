@@ -4,7 +4,7 @@ function deleteUploadedFile(el) {
     uploadedFile.remove();
     handle_files({
         parentElement: ".container-handle-files",
-        enableCamera: false, //done
+        enableCamera: true, //done
         enableFileInput: true, //done
         fileType: ".jpeg, .jpg, .png, .docx, .pdf, .xlsx", //done
         previewImage: true, //done
@@ -98,13 +98,17 @@ function handle_files(object) {
         const fileInputSection = containerElements.querySelector('.file-input-section');
         if (object.fileType) {
             fileInputSection.innerHTML = `
-                <input type="file" class="form-control text-sm btn-add-file file-input limit-size-multiple" multiple data-limit-size="20" accept="${object.fileType}" style="color: transparent; style: 100vw;">
+                <input type="file" class="form-control text-sm file-input limit-size-multiple" multiple data-limit-size="20" accept="${object.fileType}" style="color: transparent; style: 100vw;">
             `;
         } else {
             fileInputSection.innerHTML = `
-                <input type="file" class="form-control text-sm btn-add-file file-input limit-size-multiple" multiple data-limit-size="20" style="color: transparent; style: 100vw;">
+                <input type="file" class="form-control text-sm file-input limit-size-multiple" multiple data-limit-size="20" style="color: transparent; style: 100vw;">
             `;
         }
+
+        const fileInputElement = fileInputSection.querySelector('input.file-input');
+        if(fileInputSection.classList.contains('disabled')) fileInputElement.disabled = true;
+        else fileInputElement.disabled = false;
 
         if (!object.enableCamera && object.fileLimitQty !== -1) {
             fileInputSection.classList = "file-input-section w-100 d-flex align-items-center gap-1 mt-2";
@@ -120,7 +124,6 @@ function handle_files(object) {
             `
         }
 
-        const fileInputElement = fileInputSection.querySelector('.file-input');
         fileInputElement.addEventListener('change', handle_file_input);
         function handle_file_input() {
             if (fileInputElement.classList.contains('limit-size-multiple')) {
@@ -170,7 +173,7 @@ function handle_files(object) {
                 <path d="M14 13h2v2" />
             </svg>
             <video id="video" autoplay style="width: 100%; height: 300px;"></video>
-            <button type="button" class="btn w-100 btn-dark btn-take-photo btn-add-file">
+            <button type="button" class="btn w-100 btn-dark btn-take-photo">
                 Take Photo
             </button>
             <canvas id="canvas" width="500" height="500" hidden></canvas>
@@ -180,6 +183,10 @@ function handle_files(object) {
         if (object.fileLimitQty !== -1) {
             btnTakePhoto.innerHTML = `Take Photo <span class="remaining-file">0</span>/<span class="limit-file"></span>`;   
         }
+
+        if (cameraSection.classList.contains('disabled')) btnTakePhoto.disabled = true;
+        else btnTakePhoto.disabled = false;
+
         const canvas = cameraSection.querySelector("#canvas");
         btnTakePhoto.addEventListener('click', () => {
             // Mengatur ukuran canvas agar sesuai dengan ukuran video

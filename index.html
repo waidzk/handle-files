@@ -11,8 +11,8 @@
 <body>
     <div class="container-fluid container-handle-files p-3 bg-light d-flex justify-content-center align-items-center flex-column">
         <input type="file" class="saved form-control mt-3 d-none" multiple />
-        <div class="camera-section bg-danger w-100"></div>
-        <div class="file-input-section w-100 mt-2"></div>
+        <div class="camera-section bg-danger w-100 disabled"></div>
+        <div class="file-input-section w-100 mt-2 disabled"></div>
         <div class="file-list-section w-100">
             <div class="fileList mt-2 w-100"></div>
         </div>
@@ -43,7 +43,7 @@
     <script>
         handle_files({
             parentElement: ".container-handle-files",
-            enableCamera: false,
+            enableCamera: true,
             enableFileInput: true,
             fileType: ".jpeg, .jpg, .png, .docx, .pdf, .xlsx",
             previewImage: true,

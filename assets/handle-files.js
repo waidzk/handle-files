@@ -1,15 +1,19 @@
-function deleteUploadedFile(el, parent_id) {
+function deleteUploadedFile(el) {
     const uploadedFile = el.parentNode;
     const uploadedFilesSection = uploadedFile.parentNode;
+    console.log(!!parseInt(uploadedFilesSection.getAttribute('data-enableFileInput')))
     uploadedFile.remove();
     handle_files({
-        parentElement: parent_id,
-        enableCamera: true,
-        enableFileInput: true,
-        fileType: ".jpeg, .jpg, .png, .docx, .pdf, .xlsx",
-        previewImage: true,
-        fileLimitQty: 7,
+        parentElement: uploadedFilesSection.getAttribute('data-parentElement'),
+        enableCamera: uploadedFilesSection.getAttribute('data-enableCamera'),
+        enableFileInput: !!parseInt(uploadedFilesSection.getAttribute('data-enableFileInput')),
+        fileType: uploadedFilesSection.getAttribute('data-fileType'),
+        previewImage: !!parseInt(uploadedFilesSection.getAttribute('data-previewImage')),
+        fileLimitQty: parseInt(uploadedFilesSection.getAttribute('data-fileLimitQty')),
         uploadedFileQty: uploadedFilesSection.querySelectorAll('.uploaded-file').length,
+        modal: !!parseInt(uploadedFilesSection.getAttribute('data-modal')),
+        btnUploadTextModal: uploadedFilesSection.getAttribute('data-btnUploadTextModal') ? uploadedFilesSection.getAttribute('data-btnUploadTextModal') : 'Upload Files',
+        btnUploadedTextmodal: uploadedFilesSection.getAttribute('data-btnUploadedTextmodal') ? uploadedFilesSection.getAttribute('data-btnUploadedTextmodal') : 'See Uploaded Files',
     })
 }
 
@@ -45,9 +49,7 @@ function handle_files(object) {
     if (!SAVED_FILES.some(file => file.id === object.parentElement)) {
         SAVED_FILES.push({ id: object.parentElement, files: [] });
     }
-
     let obj_saved = SAVED_FILES.find(file => file.id === object.parentElement);
-
     let limitFile;
     if (object.fileLimitQty !== -1) {
         limitFile = object.fileLimitQty - object.uploadedFileQty;
@@ -97,7 +99,14 @@ function handle_files(object) {
         }
     }
 
-
+    function handle_text_modal(qty) {
+        const btnTriggerModal = containerElements.querySelector('.btn-modal');
+        if (qty > 0) {
+            btnTriggerModal.innerHTML = `<i class="fa fa-camera mr-1" aria-hidden="true"></i>${object.btnUploadedTextModal ? object.btnUploadedTextModal : 'See Uploaded Files'}`;
+        } else if (qty === 0) {
+            btnTriggerModal.innerHTML = `<i class="fa fa-camera mr-1" aria-hidden="true"></i>${object.btnUploadTextModal ? object.btnUploadTextModal : 'Upload Files'}`;
+        }
+    }
 
     // OBJECT: handle input file by element
     if (object.enableFileInput) {
@@ -142,8 +151,12 @@ function handle_files(object) {
                             if (obj_saved.files.length < limitFile) {
                                 obj_saved.files.push(fileInputElement.files[i]);
                                 handle_qty_file(obj_saved.files.length);
+                                if (object.modal) handle_text_modal(obj_saved.files.length);
                             } else console.log(`you can only upload up to ${object.fileLimitQty}`)
-                        } else obj_saved.files.push(fileInputElement.files[i]);
+                        } else {
+                            obj_saved.files.push(fileInputElement.files[i]);
+                            if (object.modal) handle_text_modal(obj_saved.files.length);
+                        }
                     }
                 }
             } else {
@@ -157,6 +170,7 @@ function handle_files(object) {
                     }
                 } else obj_saved.files = obj_saved.files.concat(files);
                 handle_qty_file(obj_saved.files.length);
+                if (object.modal) handle_text_modal(obj_saved.files.length);
             }
             fileInputElement.value = null;
             update_file_list();
@@ -209,6 +223,7 @@ function handle_files(object) {
                     // Store the file in the array
                     obj_saved.files.push(file);
                     if (object.fileLimitQty !== -1) handle_qty_file(obj_saved.files.length);
+                    if (object.modal) handle_text_modal(obj_saved.files.length);
                     update_file_list();
                 })
                 .catch(error => console.error('Error converting data URL to Blob:', error));
@@ -223,6 +238,7 @@ function handle_files(object) {
         if (object.fileLimitQty !== -1 && obj_saved.files.length > limitFile) {
             obj_saved.files = obj_saved.files.splice(0, limitFile);
             handle_qty_file(obj_saved.files.length);
+            if (object.modal) handle_text_modal(obj_saved.files.length);
         }
 
         obj_saved.files.forEach((file, index) => {
@@ -288,6 +304,7 @@ function handle_files(object) {
     function cancel_file(index) {
         obj_saved.files.splice(index, 1);
         if (object.fileLimitQty !== -1) handle_qty_file(obj_saved.files.length);
+        if (object.modal) handle_text_modal(obj_saved.files.length);
         alertLimit.innerHTML = '';
         update_file_list();
     }

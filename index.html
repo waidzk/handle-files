@@ -9,7 +9,9 @@
 </head>
 
 <body>
-    <div class="container-fluid container-handle-files p-3 bg-light d-flex justify-content-center align-items-center flex-column">
+    <div
+        class="container-fluid container-handle-files p-3 bg-light d-flex justify-content-center align-items-center flex-column">
+        <h1 class="btn-modal">Upload seal condition</h1>
         <input type="file" class="saved form-control mt-3 d-none" multiple />
         <div class="camera-section bg-danger w-100"></div>
         <div class="file-input-section w-100 mt-2"></div>
@@ -19,20 +21,30 @@
     </div>
     <div class="container-fluid p-3">
         <h4>Uploaded Files</h4>
-        <div class="uploaded-files-section mt-2 w-100">
+        <div class="uploaded-files-section" 
+            data-parentElement=".container-handle-files" 
+            data-enableCamera="1"
+            data-enableFileInput="1" 
+            data-fileType=".jpeg, .jpg, .png, .docx, .pdf, .xlsx" 
+            data-previewImage="1"
+            data-fileLimitQty="-1" 
+            data-modal="1">
             <div
                 class="uploaded-file d-flex justify-content-between align-items-center w-100 mt-1 bg-light pl-2 rounded-lg">
-                <span>uploaded-file-1.jpg</span><button type="button" onclick="deleteUploadedFile(this, '.container-handle-files')"
+                <span>uploaded-file-1.jpg</span><button type="button"
+                    onclick="deleteUploadedFile(this)"
                     class="btn btn-danger btn-xs w-25px">X</button>
             </div>
             <div
                 class="uploaded-file d-flex justify-content-between align-items-center w-100 mt-1 bg-light pl-2 rounded-lg">
-                <span>uploaded-file-2.docx</span><button type="button" onclick="deleteUploadedFile(this, '.container-handle-files')"
+                <span>uploaded-file-2.docx</span><button type="button"
+                    onclick="deleteUploadedFile(this)"
                     class="btn btn-danger btn-xs w-25px">X</button>
             </div>
             <div
                 class="uploaded-file d-flex justify-content-between align-items-center w-100 mt-1 bg-light pl-2 rounded-lg">
-                <span>uploaded-file-3.xlsx</span><button type="button" onclick="deleteUploadedFile(this, '.container-handle-files')"
+                <span>uploaded-file-3.xlsx</span><button type="button"
+                    onclick="deleteUploadedFile(this)"
                     class="btn btn-danger btn-xs w-25px">X</button>
             </div>
         </div>
@@ -49,6 +61,7 @@
             previewImage: true,
             fileLimitQty: 7,
             uploadedFileQty: 3,
+            modal: true,
         })
     </script>
 </body>

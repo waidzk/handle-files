@@ -1,7 +1,6 @@
 function deleteUploadedFile(el) {
     const uploadedFile = el.parentNode;
     const uploadedFilesSection = uploadedFile.parentNode;
-    console.log(!!parseInt(uploadedFilesSection.getAttribute('data-enableFileInput')))
     uploadedFile.remove();
     handle_files({
         parentElement: uploadedFilesSection.getAttribute('data-parentElement'),
@@ -102,9 +101,9 @@ function handle_files(object) {
     function handle_text_modal(qty) {
         const btnTriggerModal = containerElements.querySelector('.btn-modal');
         if (qty > 0) {
-            btnTriggerModal.innerHTML = `<i class="fa fa-camera mr-1" aria-hidden="true"></i>${object.btnUploadedTextModal ? object.btnUploadedTextModal : 'See Uploaded Files'}`;
+            btnTriggerModal.innerHTML = `${object.btnUploadedTextModal ? object.btnUploadedTextModal : 'See Uploaded Files'}`;
         } else if (qty === 0) {
-            btnTriggerModal.innerHTML = `<i class="fa fa-camera mr-1" aria-hidden="true"></i>${object.btnUploadTextModal ? object.btnUploadTextModal : 'Upload Files'}`;
+            btnTriggerModal.innerHTML = `${object.btnUploadTextModal ? object.btnUploadTextModal : 'Upload Files'}`;
         }
     }
 

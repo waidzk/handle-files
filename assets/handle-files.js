@@ -1,6 +1,6 @@
 function deleteUploadedFile(el) {
-    const uploadedFile = el.parentNode;
-    const uploadedFilesSection = uploadedFile.parentNode;
+    const uploadedFilesSection = el.closest(".uploaded-files");
+    const uploadedFile = el.closest(".uploaded-file");
     uploadedFile.remove();
     handle_files({
         parentElement: uploadedFilesSection.getAttribute('data-parentElement'),
@@ -13,6 +13,8 @@ function deleteUploadedFile(el) {
         modal: !!parseInt(uploadedFilesSection.getAttribute('data-modal')),
         btnUploadTextModal: uploadedFilesSection.getAttribute('data-btnUploadTextModal') ? uploadedFilesSection.getAttribute('data-btnUploadTextModal') : 'Upload Files',
         btnUploadedTextmodal: uploadedFilesSection.getAttribute('data-btnUploadedTextmodal') ? uploadedFilesSection.getAttribute('data-btnUploadedTextmodal') : 'See Uploaded Files',
+        uploadedText: uploadedFilesSection.getAttribute('data-uploadedText') ? uploadedFilesSection.getAttribute('data-uploadedText') : "Uploaded File(s): ",
+        limitText: uploadedFilesSection.getAttribute('data-limitText') ? uploadedFilesSection.getAttribute('data-limitText') : "You can only upload up to"
     })
 }
 
@@ -56,15 +58,25 @@ function handle_files(object) {
     const containerElements = document.querySelector(object.parentElement);
     const savedFilesInputElement = containerElements.querySelector('.saved'); //element input type file yang akan menyimpan semua file yg di upload untuk diambil value(files)-nya
     const fileListSection = containerElements.querySelector('.file-list-section');
-    if (!containerElements.querySelector('.alert-limit')) {
+    if (!containerElements.querySelector('.alert-limit') && !object.modal) {
         const div = document.createElement('div');
         div.classList = 'w-100 alert-limit';
         containerElements.prepend(div);
+    } else if (!containerElements.querySelector('.alert-limit')) {
+        const modalBody = containerElements.querySelector(".modal-body div");
+        const div = document.createElement('div');
+        div.classList = 'w-100 alert-limit';
+        modalBody.prepend(div);
     }
-    if (!containerElements.querySelector('.alert-uploaded')) {
+    if (!containerElements.querySelector('.alert-uploaded') && !object.modal) {
         const div = document.createElement('div');
         div.classList = 'w-100 alert-uploaded';
         containerElements.prepend(div);
+    } else if (!containerElements.querySelector('.alert-uploaded')) {
+        const modalBody = containerElements.querySelector(".modal-body div");
+        const div = document.createElement('div');
+        div.classList = 'w-100 alert-uploaded';
+        modalBody.prepend(div);
     }
     const alertUploaded = containerElements.querySelector('.alert-uploaded');
     const alertLimit = containerElements.querySelector('.alert-limit');
@@ -72,9 +84,11 @@ function handle_files(object) {
     if (object.uploadedFileQty > 0) {
         alertUploaded.innerHTML = `
             <div class="alert alert-info mb-1" style="font-size: 12px;">
-                Uploaded photos by customer is ${object.uploadedFileQty}
+                ${object.uploadedText ? object.uploadedText : 'Uploaded File(s): '} ${object.uploadedFileQty}
             </div>
         `
+    } else {
+        alertUploaded.innerHTML = "";
     }
 
     function handle_qty_file(_uploadedFileQty) {
@@ -85,7 +99,7 @@ function handle_files(object) {
             if (_uploadedFileQty >= limitFile) {
                 alertLimit.innerHTML += `
                     <div class="alert alert-danger alert-limit mb-1" style="font-size: 12px;">
-                        You can only upload up to ${object.fileLimitQty} files
+                        ${object.limitText ? object.limitText : 'You can only upload up to'} ${object.fileLimitQty} files
                     </div>
                 `
                 if (object.enableFileInput) btnInput.disabled = true;
@@ -151,7 +165,7 @@ function handle_files(object) {
                                 obj_saved.files.push(fileInputElement.files[i]);
                                 handle_qty_file(obj_saved.files.length);
                                 if (object.modal) handle_text_modal(obj_saved.files.length);
-                            } else console.log(`you can only upload up to ${object.fileLimitQty}`)
+                            } // else console.log(`you can only upload up to ${object.fileLimitQty}`)
                         } else {
                             obj_saved.files.push(fileInputElement.files[i]);
                             if (object.modal) handle_text_modal(obj_saved.files.length);
@@ -165,7 +179,7 @@ function handle_files(object) {
                         obj_saved.files = obj_saved.files.concat(files);
                     } else {
                         obj_saved.files = obj_saved.files.concat(files.splice(0, limitFile)); // hanya mengambil 10 file
-                        console.log(`you can only upload up to ${object.fileLimitQty}`)
+                        // console.log(`you can only upload up to ${object.fileLimitQty}`)
                     }
                 } else obj_saved.files = obj_saved.files.concat(files);
                 handle_qty_file(obj_saved.files.length);
@@ -184,8 +198,7 @@ function handle_files(object) {
                 class="icon icon-tabler icon-tabler-camera-rotate float-right" width="44" height="44" viewBox="0 0 24 24"
                 stroke-width="1.5" stroke="#000000" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path
-                    d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2" />
+                <path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2" />
                 <path d="M11.245 15.904a3 3 0 0 0 3.755 -2.904m-2.25 -2.905a3 3 0 0 0 -3.75 2.905" />
                 <path d="M10 13h-2v-2" />
                 <path d="M14 13h2v2" />
@@ -317,3 +330,5 @@ function handle_files(object) {
         limitFileElement.innerHTML = object.fileLimitQty;
     }
 }
+
+Fancybox.bind('[data-fancybox="photos"]');
